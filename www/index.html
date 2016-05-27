@@ -8,36 +8,39 @@
     <title>Geolocalización </title>
 
     <script type="text/javascript" charset="utf-8" src="cordova.js"></script>
-	<script src="lib/jquery/jquery.mobile-1.4.5.min.js"></script>
 	<script type="text/javascript" src="http://maps.googleapis.com/maps/api/js?sensor=true"></script>
 	<link href="http://code.google.com/apis/maps/documentation/javascript/examples/default.css" rel="stylesheet" type="text/css" />
-	<link rel="stylesheet" href="css/jquery.mobile-1.4.5.min.css" />
-	<script type="text/javascript" src="lib/gmaps.js"></script> 
     <script type="text/javascript" charset="utf-8">
 		
 
-		function onSuccess(position) {
+	function onSuccess(position) {
 		var element = document.getElementById('geolocation');
-
-			
-			initialize(position.coords.latitude,position.coords.longitude);
-			
-		
-		}
+		initialize(position.coords.latitude,position.coords.longitude);
+	}
 	function initialize(lat,log) {
-			/*la informacion esta sacada desde la misma web (https://developers.google.com/maps/documentation/javascript/geocoding?hl=es#GeocodingResponses)*/
+			/*
+				Basado en un código en
+				https://developers.google.com/maps/documentation/javascript/geocoding?hl=es#GeocodingResponses
+			*/
 				var geocoder;
 				var map;
 				var infowindow = new google.maps.InfoWindow();	
 				var element = document.getElementById('resultado');
 				var latlng = new google.maps.LatLng(lat,log);
 				var mapOptions = {
-				zoom: 15,
-				center: latlng,
-				mapTypeId: 'roadmap'
-			  }
+					zoom: 15,
+					center: latlng,
+					mapTypeId: 'roadmap'
+				}
 			 
 				map = new google.maps.Map(document.getElementById('map-canvas'), mapOptions);
+				
+				var marker = new google.maps.Marker({
+								position: latlng,
+								map: map,
+								title: 'Hello World!'
+							  });
+							  
 				geocoder = new google.maps.Geocoder();
 				geocoder.geocode({"latLng": latlng}, function(results, status)
 			{
@@ -46,7 +49,19 @@
 				{
 					if (results[0]) 
 					{ 
-					
+
+						//alert(JSON.stringify(results.length));
+						/*for(var i=0;i<results.length;i++){
+							//Creamos una nueva latlng para situar un punto en el mapa
+							
+							var marker = new google.maps.Marker({
+								position:results[i].geometry.location, 
+								map: map,
+								title: 'Punto numero '+i
+							  });
+						}
+						//alert(JSON.stringify(results[i]));
+						return;*/
 						dir = "<p><strong>Dirección: </strong>" + results[0].formatted_address + "</p>";
 						dir += '<p><strong>address_components.short_name:</strong>'+results[0].address_components[0]['short_name']+'</p>';
 						dir += '<p><strong>address_components.short_name:</strong>'+results[0].address_components[0]['long_name']+'</p>';
@@ -86,12 +101,6 @@
 
 				element.innerHTML = "<p>" + dir + '</p>';
 			});
-	
-			    var marker = new google.maps.Marker({
-					position: latlng,
-					map: map,
-					title: 'Hello World!'
-				  });
 
 			  
 			}
@@ -104,7 +113,7 @@
 	// Options: throw an error if no update is received every 30 seconds.
 	
 	//
-		//var watchID = navigator.geolocation.watchPosition(onSuccess, onError, {maximumAge: 60000, timeout: 5000, enableHighAccuracy: true }); // esta me mira cada moment0
+		//var watchID = navigator.geolocation.watchPosition(onSuccess, onError, {maximumAge: 60000, timeout: 5000, enableHighAccuracy: true }); // esta me mira cada momento
 		var watchID = navigator.geolocation.getCurrentPosition(onSuccess, onError, {maximumAge: 30000, timeout: 5000, enableHighAccuracy: true }); // esta me mira una vez
 	//var watchID = navigator.geolocation.watchPosition(onSuccess, onError, 500000);
 	 function clearWatch() { 
@@ -113,15 +122,9 @@
             navigator.geolocation.clearWatch(watchID);
             watchID = null;
         }
-		alert('ss');
+		
     }
-	 function calc2points() { 
-		var watchID = navigator.geolocation.getCurrentPosition(onSuccess, onError, {maximumAge: 30000, timeout: 5000, enableHighAccuracy: true }); 
-		var x1=new google.maps.LatLng(50.995093,-16.417091);
-		var x2=new google.maps.LatLng(50.997698,-16.41788);
-		var distancia = google.maps.geometry.spherical.computeDistanceBetween(x1, x2);
-		alert(distancia);
-    }
+
 
 	
 	
@@ -143,7 +146,7 @@
 	      <div id="map-canvas">
                                         
           </div>
-	<button onclick="calc2points" >Calcular distancia entre dos puntos</button>
+	
 	
 <script>
 
