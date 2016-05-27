@@ -8,11 +8,8 @@
     <title>Geolocalización </title>
 
     <script type="text/javascript" charset="utf-8" src="cordova.js"></script>
-	<script src="lib/jquery/jquery.mobile-1.4.5.min.js"></script>
 	<script type="text/javascript" src="http://maps.googleapis.com/maps/api/js?sensor=true"></script>
 	<link href="http://code.google.com/apis/maps/documentation/javascript/examples/default.css" rel="stylesheet" type="text/css" />
-	<link rel="stylesheet" href="css/jquery.mobile-1.4.5.min.css" />
-	<script type="text/javascript" src="lib/gmaps.js"></script> 
     <script type="text/javascript" charset="utf-8">
 		
 
@@ -51,10 +48,8 @@
 				if (status == google.maps.GeocoderStatus.OK)
 				{
 					if (results[0]) 
-					{ 
-
-						//alert(JSON.stringify(results.length));
-						for(var i=0;i<results.length;i++){
+					{ //alert(JSON.stringify(results.length));
+						/*for(var i=0;i<results.length;i++){
 							//Creamos una nueva latlng para situar un punto en el mapa
 							
 							var marker = new google.maps.Marker({
@@ -64,7 +59,7 @@
 							  });
 						}
 						//alert(JSON.stringify(results[i]));
-						return;
+						return;*/
 						dir = "<p><strong>Dirección: </strong>" + results[0].formatted_address + "</p>";
 						dir += '<p><strong>address_components.short_name:</strong>'+results[0].address_components[0]['short_name']+'</p>';
 						dir += '<p><strong>address_components.short_name:</strong>'+results[0].address_components[0]['long_name']+'</p>';
@@ -116,7 +111,7 @@
 	// Options: throw an error if no update is received every 30 seconds.
 	
 	//
-		//var watchID = navigator.geolocation.watchPosition(onSuccess, onError, {maximumAge: 60000, timeout: 5000, enableHighAccuracy: true }); // esta me mira cada moment0
+		//var watchID = navigator.geolocation.watchPosition(onSuccess, onError, {maximumAge: 60000, timeout: 5000, enableHighAccuracy: true }); // esta me mira cada momento
 		var watchID = navigator.geolocation.getCurrentPosition(onSuccess, onError, {maximumAge: 30000, timeout: 5000, enableHighAccuracy: true }); // esta me mira una vez
 	//var watchID = navigator.geolocation.watchPosition(onSuccess, onError, 500000);
 	 function clearWatch() { 
