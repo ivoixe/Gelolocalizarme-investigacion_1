@@ -12,10 +12,15 @@
 	<link href="http://code.google.com/apis/maps/documentation/javascript/examples/default.css" rel="stylesheet" type="text/css" />
     <script type="text/javascript" charset="utf-8">
 		
-
+	// Options: throw an error if no update is received every 30 seconds.
+	//var watchID = navigator.geolocation.watchPosition(onSuccess, onError, {maximumAge: 60000, timeout: 5000, enableHighAccuracy: true }); // esta me mira cada momento
+	var watchID = navigator.geolocation.getCurrentPosition(onSuccess, onError, {maximumAge: 30000, timeout: 5000, enableHighAccuracy: true }); // esta me mira una vez
+	//var watchID = navigator.geolocation.watchPosition(onSuccess, onError, 500000);
+	
 	function onSuccess(position) {
 		var element = document.getElementById('geolocation');
 		initialize(position.coords.latitude,position.coords.longitude);
+	    return position;
 	}
 	function initialize(lat,log) {
 			/*
@@ -57,13 +62,16 @@
 								map: map,
 								title: 'Punto numero '+i
 							  });
-						}
-						//alert(JSON.stringify(results[i]));
-						return;*/
+						}*/
+						/*alert(JSON.stringify(results[i]));return;*/
+						
 						dir = "<p><strong>Dirección: </strong>" + results[0].formatted_address + "</p>";
 						dir += '<p><strong>address_components.short_name:</strong>'+results[0].address_components[0]['short_name']+'</p>';
 						dir += '<p><strong>address_components.short_name:</strong>'+results[0].address_components[0]['long_name']+'</p>';
 						dir += '<p><strong>place id:</strong>'+results[0].place_id+'</p>';
+						
+						dir += '<span id="lat" class="hidden">'+lat+'</span>';
+						dir += '<span id="log" class="hidden">'+log+'</span>';
 						/*Por ahora son las que  he podido sacar de variables que se supone que son todas estass
 						results[]: {
 							 types[]: string,
@@ -97,29 +105,43 @@
 					dir = "<p>El Servicio de Codificación Geográfica ha fallado con el siguiente error: " + status + ".</p>";
 				}
 
-				element.innerHTML = "<p>" + dir + '</p>';
+				element.innerHTML = dir;
+				
 			});
 
 			  
 			}
+	function guardar_ubicacion(){
+			var xhttp = new XMLHttpRequest();
+			navigator.geolocation.getCurrentPosition(onSuccess, onError, {maximumAge: 30000, timeout: 5000, enableHighAccuracy: true });
+			var element = document.getElementById('resultado_coordenadas');			
+			  /*lo que se supone que voy a enviar*/
+			   var lat = document.getElementById('lat').innerText;
+			   var log = document.getElementById('log').innerText;
+			   var lo_que_se_envia = ""
+        	   lo_que_se_envia = '<p>LATITUD AHORA:' + lat + '</p>'
+        	   lo_que_se_envia += '<p>Longitud AHORA:' + log + '</p>'
+			   element.innerHTML = lo_que_se_envia  ;
+
+			  /*
+			  xhttp.open("GET", "demo_get.asp", true);
+			  xhttp.send();
+			  */
+			  
+	
+	}
 
 	function onError(error) {
 		alert('code: '    + error.code    + '\n' +
 			  'message: ' + error.message + '\n');
 	}
-
-	// Options: throw an error if no update is received every 30 seconds.
-	
-	//
-		//var watchID = navigator.geolocation.watchPosition(onSuccess, onError, {maximumAge: 60000, timeout: 5000, enableHighAccuracy: true }); // esta me mira cada momento
-		var watchID = navigator.geolocation.getCurrentPosition(onSuccess, onError, {maximumAge: 30000, timeout: 5000, enableHighAccuracy: true }); // esta me mira una vez
-	//var watchID = navigator.geolocation.watchPosition(onSuccess, onError, 500000);
 	 function clearWatch() { 
 		var watchID = navigator.geolocation.getCurrentPosition(onSuccess, onError, {maximumAge: 30000, timeout: 5000, enableHighAccuracy: true }); 
         if (watchID != null) {
             navigator.geolocation.clearWatch(watchID);
             watchID = null;
         }
+		
 		
     }
 
@@ -135,6 +157,9 @@
 	   height:200px;
 	   
 	 }
+	 .hidden{
+	 display:none;
+	 }
 	</style>
   </head>
   <body>
@@ -144,8 +169,8 @@
 	      <div id="map-canvas">
                                         
           </div>
-	
-	
+	 <button onclick="guardar_ubicacion();">Guardar ubicacion</button>
+	 <p id="resultado_coordenadas"></p>
 <script>
 
     
