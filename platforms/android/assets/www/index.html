@@ -8,148 +8,158 @@
     <title>Geolocalización </title>
 
     <script type="text/javascript" charset="utf-8" src="cordova.js"></script>
+    <script type="text/javascript" charset="utf-8" src="js/jquery-1.12.4.min.js"></script>
 	<script type="text/javascript" src="http://maps.googleapis.com/maps/api/js?sensor=true"></script>
 	<link href="http://code.google.com/apis/maps/documentation/javascript/examples/default.css" rel="stylesheet" type="text/css" />
     <script type="text/javascript" charset="utf-8">
-		
-	// Options: throw an error if no update is received every 30 seconds.
-	//var watchID = navigator.geolocation.watchPosition(onSuccess, onError, {maximumAge: 60000, timeout: 5000, enableHighAccuracy: true }); // esta me mira cada momento
-	var watchID = navigator.geolocation.getCurrentPosition(onSuccess, onError, {maximumAge: 30000, timeout: 5000, enableHighAccuracy: true }); // esta me mira una vez
-	//var watchID = navigator.geolocation.watchPosition(onSuccess, onError, 500000);
+
+	var lat_actual = 0;
+	var log_actual = 0;
+	var ultimo_resultado = {};
+	//La función que carga el mapa con la longitud y latitud indicada y añade la info al html
+	function initialize(lat,log) {
+		/*
+			Basado en un código en
+			https://developers.google.com/maps/documentation/javascript/geocoding?hl=es#GeocodingResponses
+		*/
+			var geocoder;
+			var map;
+			var infowindow = new google.maps.InfoWindow();	
+			var element = document.getElementById('resultado');
+			var latlng = new google.maps.LatLng(lat,log);
+			var mapOptions = {
+				zoom: 15,
+				center: latlng,
+				mapTypeId: 'roadmap'
+			}
+		 
+			map = new google.maps.Map(document.getElementById('map-canvas'), mapOptions);
+			
+			var marker = new google.maps.Marker({
+							position: latlng,
+							map: map,
+							title: 'Hello World!'
+						  });
+						  
+			geocoder = new google.maps.Geocoder();
+			geocoder.geocode({"latLng": latlng}, function(results, status)
+		{
+			
+			if (status == google.maps.GeocoderStatus.OK)
+			{
+				if (results[0]) //Salen 8 resultados; uno nuestra posición, la posición de nuestra provincia, país, ....
+				{ 
+					ultimo_resultado = results[0];
+					dir = "<p><strong>Dirección: </strong>" + results[0].formatted_address + "</p>";
+					dir += '<p><strong>address_components.short_name:</strong>'+results[0].address_components[0]['short_name']+'</p>';
+					dir += '<p><strong>address_components.short_name:</strong>'+results[0].address_components[0]['long_name']+'</p>';
+					dir += '<p><strong>place id:</strong>'+results[0].place_id+'</p>';
+					
+					//dir += '<span id="lat" class="hidden">'+lat+'</span>';
+					//dir += '<span id="log" class="hidden">'+log+'</span>';
+					
+					lat_actual = lat;
+					log_actual = log;
+					
+					/*Por ahora son las que  he podido sacar de variables que se supone que son todas estas
+					results[]: {
+						 types[]: string,
+						 formatted_address: string,
+						 address_components[]: {
+						   short_name: string,
+						   long_name: string,
+						   postcode_localities[]: string,
+						   types[]: string
+						 },
+						 partial_match: boolean,
+						 place_id: string,
+						 postcode_localities[]: string,
+						 geometry: {
+						   location: LatLng,
+						   location_type: GeocoderLocationType
+						   viewport: LatLngBounds,
+						   bounds: LatLngBounds
+						 }
+						}
+					*/
+				
+				}else{
+					dir = "<p>No se ha podido obtener ninguna dirección en esas coordenadas.</p>";
+				}
+			}else{
+				dir = "<p>El Servicio de Codificación Geográfica ha fallado con el siguiente error: " + status + ".</p>";
+			}
+
+			element.innerHTML = dir;
+			
+		});
+	}
 	
+	//Cuando conseguimos localizarnos ...
 	function onSuccess(position) {
 		var element = document.getElementById('geolocation');
 		initialize(position.coords.latitude,position.coords.longitude);
 	    return position;
 	}
-	function initialize(lat,log) {
-			/*
-				Basado en un código en
-				https://developers.google.com/maps/documentation/javascript/geocoding?hl=es#GeocodingResponses
-			*/
-				var geocoder;
-				var map;
-				var infowindow = new google.maps.InfoWindow();	
-				var element = document.getElementById('resultado');
-				var latlng = new google.maps.LatLng(lat,log);
-				var mapOptions = {
-					zoom: 15,
-					center: latlng,
-					mapTypeId: 'roadmap'
-				}
-			 
-				map = new google.maps.Map(document.getElementById('map-canvas'), mapOptions);
-				
-				var marker = new google.maps.Marker({
-								position: latlng,
-								map: map,
-								title: 'Hello World!'
-							  });
-							  
-				geocoder = new google.maps.Geocoder();
-				geocoder.geocode({"latLng": latlng}, function(results, status)
-			{
-				
-				if (status == google.maps.GeocoderStatus.OK)
-				{
-					if (results[0]) 
-					{ //alert(JSON.stringify(results.length));
-						/*for(var i=0;i<results.length;i++){
-							//Creamos una nueva latlng para situar un punto en el mapa
-							
-							var marker = new google.maps.Marker({
-								position:results[i].geometry.location, 
-								map: map,
-								title: 'Punto numero '+i
-							  });
-						}*/
-						/*alert(JSON.stringify(results[i]));return;*/
-						
-						dir = "<p><strong>Dirección: </strong>" + results[0].formatted_address + "</p>";
-						dir += '<p><strong>address_components.short_name:</strong>'+results[0].address_components[0]['short_name']+'</p>';
-						dir += '<p><strong>address_components.short_name:</strong>'+results[0].address_components[0]['long_name']+'</p>';
-						dir += '<p><strong>place id:</strong>'+results[0].place_id+'</p>';
-						
-						dir += '<span id="lat" class="hidden">'+lat+'</span>';
-						dir += '<span id="log" class="hidden">'+log+'</span>';
-						/*Por ahora son las que  he podido sacar de variables que se supone que son todas estass
-						results[]: {
-							 types[]: string,
-							 formatted_address: string,
-							 address_components[]: {
-							   short_name: string,
-							   long_name: string,
-							   postcode_localities[]: string,
-							   types[]: string
-							 },
-							 partial_match: boolean,
-							 place_id: string,
-							 postcode_localities[]: string,
-							 geometry: {
-							   location: LatLng,
-							   location_type: GeocoderLocationType
-							   viewport: LatLngBounds,
-							   bounds: LatLngBounds
-							 }
-							}
-						*/
-					
-					}
-					else
-					{
-						dir = "<p>No se ha podido obtener ninguna dirección en esas coordenadas.</p>";
-					}
-				}
-				else
-				{
-					dir = "<p>El Servicio de Codificación Geográfica ha fallado con el siguiente error: " + status + ".</p>";
-				}
-
-				element.innerHTML = dir;
-				
-			});
-
-			  
-			}
-	function guardar_ubicacion(){
-			var xhttp = new XMLHttpRequest();
-			navigator.geolocation.getCurrentPosition(onSuccess, onError, {maximumAge: 30000, timeout: 5000, enableHighAccuracy: true });
-			var element = document.getElementById('resultado_coordenadas');			
-			  /*lo que se supone que voy a enviar*/
-			   var lat = document.getElementById('lat').innerText;
-			   var log = document.getElementById('log').innerText;
-			   var lo_que_se_envia = ""
-        	   lo_que_se_envia = '<p>LATITUD AHORA:' + lat + '</p>'
-        	   lo_que_se_envia += '<p>Longitud AHORA:' + log + '</p>'
-			   element.innerHTML = lo_que_se_envia  ;
-
-			  /*
-			  xhttp.open("GET", "demo_get.asp", true);
-			  xhttp.send();
-			  */
-			  
 	
-	}
-
+	//Si algo fallase al localizarnos...
 	function onError(error) {
 		alert('code: '    + error.code    + '\n' +
 			  'message: ' + error.message + '\n');
 	}
-	 function clearWatch() { 
-		var watchID = navigator.geolocation.getCurrentPosition(onSuccess, onError, {maximumAge: 30000, timeout: 5000, enableHighAccuracy: true }); 
+	
+	//Esta función hace ... Llama a las funciones X e Y que hacen ... Los valores numéricos (3000,5000) son para ...
+	function clearWatch() { 
+		var watchID = navigator.geolocation.getCurrentPosition(
+					onSuccess, 
+					onError, 
+					{
+						maximumAge: 30000, 
+						timeout: 5000, 
+						enableHighAccuracy: true
+					}
+		); 
         if (watchID != null) {
             navigator.geolocation.clearWatch(watchID);
             watchID = null;
         }
-		
-		
     }
 
+	//Guardamos la posición actual en el servidor (para histórico) y recargamos la posición actual
+	function guardar_ubicacion(){
+		navigator.geolocation.getCurrentPosition(
+			function(position){
+				//Enviamos info al server
+			   $.ajax({
+					method: "POST",
+					url:'http://pruebas.neoprisma.com/ajax-app/cron.php',
+					data: ({verify:1,lat:lat_actual,log:log_actual,resultado:JSON.stringify(ultimo_resultado)}),
+					dataType: "json",
+					success: function(resp){
+						element.innerHTML = '<p>LATITUD AHORA:' + resp.lat + '</p><p>Longitud AHORA:' + resp.log + '</p>';
+						
+					},
+					error: function(){
+						alert('Error al actualizar la posición.');
+					}
+				});
+	   
+				onSuccess(position);
+			}
+		
+		, onError, {maximumAge: 30000, timeout: 5000, enableHighAccuracy: true });
+		var element = document.getElementById('resultado_coordenadas');			
+	}
+			
+	// Options: throw an error if no update is received every 30 seconds.
+	//var watchID = navigator.geolocation.watchPosition(onSuccess, onError, {maximumAge: 60000, timeout: 5000, enableHighAccuracy: true }); // esta me mira cada momento
+	//var watchID = navigator.geolocation.watchPosition(onSuccess, onError, 500000);
+	var watchID = navigator.geolocation.getCurrentPosition(onSuccess, onError, {maximumAge: 30000, timeout: 5000, enableHighAccuracy: true }); // esta me mira una vez
+	
     </script>
 	<style>
 	 #map-canvas{
 	   height:200px;
-	   
 	 }
 	 .hidden{
 	 display:none;
@@ -160,9 +170,9 @@
    
     <p id="resultado"></p>
 	  <button onclick="clearWatch();">Volver a ubicar</button>
-	      <div id="map-canvas">
-                                        
-          </div>
+	  <div id="map-canvas">
+									
+	  </div>
 	 <button onclick="guardar_ubicacion();">Guardar ubicacion</button>
 	 <p id="resultado_coordenadas"></p>
 <script>
